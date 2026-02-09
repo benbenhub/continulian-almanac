@@ -2,6 +2,7 @@ package com.tyme.test;
 
 import com.tyme.culture.star.twentyeight.TwentyEightStar;
 import com.tyme.lunar.LunarDay;
+import com.tyme.solar.SolarDay;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -176,6 +177,12 @@ public class LunarDayTest {
   public void test28() {
     LunarDay lunar = LunarDay.fromYmd(2024, 3, 5);
     Assert.assertEquals("大安", lunar.getMinorRen().getName());
+  }
+
+  @Test
+  public void test29() {
+    LunarDay lunar = SolarDay.fromYmd(2026, 2, 5).getLunarDay();
+    Assert.assertEquals("己丑", lunar.getLunarMonth().getSixtyCycle().getName());
   }
 
 }

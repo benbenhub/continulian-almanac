@@ -68,4 +68,24 @@ public class LegalHolidayTest {
     Assert.assertEquals("2025年1月29日", d.getTarget().toString());
   }
 
+  @Test
+  public void test7() {
+    LegalHoliday d = SolarDay.fromYmd(2026, 9, 20).getLegalHoliday();
+    Assert.assertNotNull(d);
+    Assert.assertEquals("2026年9月20日 国庆节(班)", d.toString());
+    Assert.assertEquals("2026年10月1日", d.getTarget().toString());
+
+    d = SolarDay.fromYmd(2026, 9, 25).getLegalHoliday();
+    Assert.assertNotNull(d);
+    Assert.assertEquals("2026年9月25日 中秋节(休)", d.toString());
+
+    d = SolarDay.fromYmd(2026, 9, 27).getLegalHoliday();
+    Assert.assertNotNull(d);
+    Assert.assertEquals("2026年9月27日 中秋节(休)", d.toString());
+
+    d = SolarDay.fromYmd(2026, 10, 1).getLegalHoliday();
+    Assert.assertNotNull(d);
+    Assert.assertEquals("2026年10月1日 国庆节(休)", d.toString());
+  }
+
 }

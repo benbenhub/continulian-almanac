@@ -123,7 +123,7 @@ public class LunarMonth extends MonthUnit {
     if (isLeap()) {
       index += 1;
     } else {
-      int leapMonth = LunarYear.fromYear(year).getLeapMonth();
+      int leapMonth = getLunarYear().getLeapMonth();
       if (leapMonth > 0 && month > leapMonth) {
         index += 1;
       }

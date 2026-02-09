@@ -3,6 +3,7 @@ package com.tyme.festival;
 import com.tyme.AbstractTyme;
 import com.tyme.enums.FestivalType;
 import com.tyme.lunar.LunarDay;
+import com.tyme.solar.SolarDay;
 import com.tyme.solar.SolarTerm;
 
 import java.util.regex.Matcher;
@@ -80,22 +81,28 @@ public class LunarFestival extends AbstractTyme {
     if (matcher.find()) {
       return new LunarFestival(FestivalType.DAY, LunarDay.fromYmd(year, month, day), null, matcher.group());
     }
+    LunarDay lunarDay = LunarDay.fromYmd(year, month, day);
+    SolarDay solarDay = lunarDay.getSolarDay();
     matcher = Pattern.compile("@\\d{2}1\\d{2}").matcher(DATA);
     while (matcher.find()) {
       String data = matcher.group();
-      SolarTerm solarTerm = SolarTerm.fromIndex(year, Integer.parseInt(data.substring(4), 10));
-      LunarDay lunarDay = solarTerm.getSolarDay().getLunarDay();
-      if (lunarDay.getYear() == year && lunarDay.getMonth() == month && lunarDay.getDay() == day) {
-        return new LunarFestival(FestivalType.TERM, lunarDay, solarTerm, data);
+      SolarTerm term = SolarTerm.fromIndex(year, Integer.parseInt(data.substring(4), 10));
+      SolarDay termDay = term.getSolarDay();
+      if (termDay.getYear() == solarDay.getYear() && termDay.getMonth() == solarDay.getMonth() && termDay.getDay() == solarDay.getDay()) {
+        return new LunarFestival(FestivalType.TERM, lunarDay, term, data);
       }
     }
-    matcher = Pattern.compile("@\\d{2}2").matcher(DATA);
-    if (!matcher.find()) {
-      return null;
+    if (month == 12 && day > 28) {
+      matcher = Pattern.compile("@\\d{2}2").matcher(DATA);
+      if (!matcher.find()) {
+        return null;
+      }
+      LunarDay nextDay = lunarDay.next(1);
+      if (nextDay.getMonth() == 1 && nextDay.getDay() == 1) {
+        return new LunarFestival(FestivalType.EVE, lunarDay, null, matcher.group());
+      }
     }
-    LunarDay lunarDay = LunarDay.fromYmd(year, month, day);
-    LunarDay nextDay = lunarDay.next(1);
-    return nextDay.getMonth() == 1 && nextDay.getDay() == 1 ? new LunarFestival(FestivalType.EVE, lunarDay, null, matcher.group()) : null;
+    return null;
   }
 
   public LunarFestival next(int n) {
