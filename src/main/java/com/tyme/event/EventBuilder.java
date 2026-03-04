@@ -42,11 +42,6 @@ public class EventBuilder {
     return this;
   }
 
-  protected EventBuilder term(EventType type, int a, int b, int c) {
-    int n = c > 31 ? 31 : (c < -31 ? -31 : 0);
-    return content(type, a, b, c - n).offset(n);
-  }
-
   /**
    * 公历日
    *
@@ -87,11 +82,11 @@ public class EventBuilder {
    * 节气
    *
    * @param termIndex 节气索引（0至23）
-   * @param delayDays 顺延天数，（最远支持-62至62天）
+   * @param delayDays 顺延天数（最远支持-31至31天）
    * @return 事件构建器
    */
   public EventBuilder termDay(int termIndex, int delayDays) {
-    return term(EventType.TERM_DAY, termIndex, 0, delayDays);
+    return content(EventType.TERM_DAY, termIndex, 0, delayDays);
   }
 
   /**
@@ -99,11 +94,11 @@ public class EventBuilder {
    *
    * @param termIndex       节气索引（0至23）
    * @param heavenStemIndex 天干索引（0至9）
-   * @param delayDays       顺延天数，（最远支持-62至62天）
+   * @param delayDays       顺延天数（最远支持-31至31天）
    * @return 事件构建器
    */
   public EventBuilder termHeavenStem(int termIndex, int heavenStemIndex, int delayDays) {
-    return term(EventType.TERM_HS, termIndex, heavenStemIndex, delayDays);
+    return content(EventType.TERM_HS, termIndex, heavenStemIndex, delayDays);
   }
 
   /**
@@ -111,11 +106,11 @@ public class EventBuilder {
    *
    * @param termIndex        节气索引（0至23）
    * @param earthBranchIndex 地支索引（0至11）
-   * @param delayDays        顺延天数，（最远支持-62至62天）
+   * @param delayDays        顺延天数（最远支持-31至31天）
    * @return 事件构建器
    */
   public EventBuilder termEarthBranch(int termIndex, int earthBranchIndex, int delayDays) {
-    return term(EventType.TERM_EB, termIndex, earthBranchIndex, delayDays);
+    return content(EventType.TERM_EB, termIndex, earthBranchIndex, delayDays);
   }
 
   /**
@@ -137,7 +132,7 @@ public class EventBuilder {
   /**
    * 偏移天数
    *
-   * @param days 天数
+   * @param days 天数（最远支持-31至31天）
    * @return 事件构造器
    */
   public EventBuilder offset(int days) {

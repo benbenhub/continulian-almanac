@@ -38,7 +38,7 @@ public class EventManager {
    *
    * @param name 名称
    */
-  public static void delete(String name) {
+  public static void remove(String name) {
     DATA = DATA.replaceAll(String.format(REGEX, name), "");
   }
 
@@ -68,7 +68,7 @@ public class EventManager {
    * @param name 名称
    * @param data 事件数据
    */
-  public static void update(String name, String data) {
+  public static void updateData(String name, String data) {
     Event.validate(data);
     saveOrUpdate(name, data);
   }

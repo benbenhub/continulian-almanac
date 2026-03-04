@@ -65,9 +65,9 @@ public class EventTest {
     // 清明前1天
     EventManager.update("寒食节", Event.builder().termDay(7, -1).build());
     // 立春后第5个戊日
-    EventManager.update("春社", Event.builder().termHeavenStem(3, 4, 40).build());
+    EventManager.update("春社", Event.builder().termHeavenStem(3, 4, 30).offset(10).build());
     // 立秋后第5个戊日
-    EventManager.update("秋社", Event.builder().termHeavenStem(15, 4, 40).build());
+    EventManager.update("秋社", Event.builder().termHeavenStem(15, 4, 30).offset(10).build());
 
     // 夏至后第3个庚日
     EventManager.update("入伏", Event.builder().termHeavenStem(12, 6, 20).build());

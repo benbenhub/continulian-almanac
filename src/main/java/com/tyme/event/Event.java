@@ -127,9 +127,7 @@ public class Event extends AbstractCulture {
     List<Event> l = new ArrayList<>();
     Matcher matcher = Pattern.compile(String.format(EventManager.REGEX, ".[^@]+")).matcher(EventManager.DATA);
     while (matcher.find()) {
-      String data = matcher.group(1);
-      String name = matcher.group(2);
-      l.add(new Event(name, data));
+      l.add(new Event(matcher.group(2), matcher.group(1)));
     }
     return l;
   }
