@@ -49,18 +49,18 @@ public class EventTest {
     EventManager.update("农历传统节日:腊八节", Event.builder().lunarDay(12, 8, 0).build());
     EventManager.update("农历传统节日:除夕", Event.builder().lunarDay(13, 1, 0).offset(-1).build());
 
-    EventManager.update("情人节", Event.builder().solarDay(2, 14, 0).startYear(1986).build());
+    EventManager.update("情人节", Event.builder().solarDay(2, 14, 0).startYear(270).build());
     EventManager.update("国际消费者权益日", Event.builder().solarDay(3, 15, 0).startYear(1983).build());
-    EventManager.update("愚人节", Event.builder().solarDay(4, 1, 0).startYear(0).build());
-    EventManager.update("万圣夜", Event.builder().solarDay(10, 31, 0).startYear(0).build());
-    EventManager.update("万圣节", Event.builder().solarDay(11, 1, 0).startYear(0).build());
-    EventManager.update("平安夜", Event.builder().solarDay(12, 24, 0).startYear(0).build());
-    EventManager.update("圣诞节", Event.builder().solarDay(12, 25, 0).startYear(0).build());
+    EventManager.update("愚人节", Event.builder().solarDay(4, 1, 0).startYear(1564).build());
+    EventManager.update("万圣夜", Event.builder().solarDay(10, 31, 0).startYear(600).build());
+    EventManager.update("万圣节", Event.builder().solarDay(11, 1, 0).startYear(600).build());
+    EventManager.update("平安夜", Event.builder().solarDay(12, 24, 0).startYear(336).build());
+    EventManager.update("圣诞节", Event.builder().solarDay(12, 25, 0).startYear(336).build());
 
     EventManager.update("全国中小学生安全教育日", Event.builder().solarWeek(3, -1, 1).startYear(1996).build());
     EventManager.update("母亲节", Event.builder().solarWeek(5, 2, 0).startYear(1914).build());
-    EventManager.update("父亲节", Event.builder().solarWeek(6, 3, 0).startYear(1914).build());
-    EventManager.update("感恩节", Event.builder().solarWeek(11, 4, 4).startYear(1914).build());
+    EventManager.update("父亲节", Event.builder().solarWeek(6, 3, 0).startYear(1972).build());
+    EventManager.update("感恩节", Event.builder().solarWeek(11, 4, 4).startYear(1941).build());
 
     // 清明前1天
     EventManager.update("寒食节", Event.builder().termDay(7, -1).build());
