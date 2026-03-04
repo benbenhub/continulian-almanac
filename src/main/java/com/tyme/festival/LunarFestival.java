@@ -92,13 +92,12 @@ public class LunarFestival extends AbstractTyme {
         return new LunarFestival(FestivalType.TERM, lunarDay, term, data);
       }
     }
-    if (month == 12 && day > 28) {
+    if (Math.abs(month) == 12 && day > 28) {
       matcher = Pattern.compile("@\\d{2}2").matcher(DATA);
       if (!matcher.find()) {
         return null;
       }
-      LunarDay nextDay = lunarDay.next(1);
-      if (nextDay.getMonth() == 1 && nextDay.getDay() == 1) {
+      if (lunarDay.next(1).getYear() != year) {
         return new LunarFestival(FestivalType.EVE, lunarDay, null, matcher.group());
       }
     }

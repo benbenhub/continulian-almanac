@@ -43,4 +43,9 @@ public class RabByungYearTest {
     Assert.assertEquals("第十六饶迥铁牛年", RabByungYear.fromYear(1961).getName());
   }
 
+  @Test
+  public void test5() {
+    Assert.assertEquals(1961, RabByungYear.fromElementZodiac(15, RabByungElement.fromName("铁"), Zodiac.fromName("牛")).getYear());
+  }
+
 }

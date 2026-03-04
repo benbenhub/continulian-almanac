@@ -1,0 +1,259 @@
+package com.tyme.event;
+
+import com.tyme.AbstractCulture;
+import com.tyme.enums.EventType;
+import com.tyme.lunar.LunarDay;
+import com.tyme.lunar.LunarMonth;
+import com.tyme.solar.SolarDay;
+import com.tyme.solar.SolarMonth;
+import com.tyme.solar.SolarTerm;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * 事件
+ *
+ * @author 6tail
+ */
+public class Event extends AbstractCulture {
+  /**
+   * 名称
+   */
+  protected String name;
+
+  /**
+   * 数据
+   */
+  protected String data;
+
+  public static void validate(String data) {
+    if (null == data) {
+      throw new IllegalArgumentException("illegal event data: null");
+    }
+    if (data.length() != 9) {
+      throw new IllegalArgumentException("illegal event data: " + data);
+    }
+  }
+
+  protected Event(String name, String data) {
+    validate(data);
+    this.name = name;
+    this.data = data;
+  }
+
+  /**
+   * 构造器
+   *
+   * @return 构造器
+   */
+  public static EventBuilder builder() {
+    return new EventBuilder();
+  }
+
+  public static Event fromName(String name) {
+    Matcher matcher = Pattern.compile(String.format(EventManager.REGEX, name)).matcher(EventManager.DATA);
+    if (!matcher.find()) {
+      return null;
+    }
+    return new Event(name, matcher.group(1));
+  }
+
+  /**
+   * 事件类型
+   *
+   * @return 事件类型
+   */
+  public EventType getType() {
+    return EventType.fromCode(EventManager.CHARS.indexOf(data.charAt(1)));
+  }
+
+  /**
+   * 名称
+   *
+   * @return 名称
+   */
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * 数据
+   *
+   * @return 数据
+   */
+  public String getData() {
+    return data;
+  }
+
+  /**
+   * 起始年
+   *
+   * @return 年
+   */
+  public int getStartYear() {
+    int n = 0;
+    int size = EventManager.CHARS.length();
+    for (int i = 0; i < 3; i++) {
+      n = n * size + EventManager.CHARS.indexOf(data.charAt(6 + i));
+    }
+    return n;
+  }
+
+  /**
+   * 指定公历日的事件列表
+   *
+   * @param d 公历日
+   * @return 事件列表
+   */
+  public static List<Event> fromSolarDay(SolarDay d) {
+    List<Event> l = new ArrayList<>();
+    for (Event e : all()) {
+      if (d.equals(e.getSolarDay(d.getYear()))) {
+        l.add(e);
+      }
+    }
+    return l;
+  }
+
+  /**
+   * 所有事件
+   *
+   * @return 事件列表
+   */
+  public static List<Event> all() {
+    List<Event> l = new ArrayList<>();
+    Matcher matcher = Pattern.compile(String.format(EventManager.REGEX, ".[^@]+")).matcher(EventManager.DATA);
+    while (matcher.find()) {
+      String data = matcher.group(1);
+      String name = matcher.group(2);
+      l.add(new Event(name, data));
+    }
+    return l;
+  }
+
+  /**
+   * 公历日
+   *
+   * @param year 年
+   * @return 公历日，如果当年没有该事件，返回null
+   */
+  public SolarDay getSolarDay(int year) {
+    EventType type = getType();
+    if (null == type) {
+      return null;
+    }
+    if (year < getStartYear()) {
+      return null;
+    }
+    SolarDay d = null;
+    switch (type) {
+      case SOLAR_DAY:
+        d = getSolarDayBySolarDay(year);
+        break;
+      case SOLAR_WEEK:
+        d = getSolarDayByWeek(year);
+        break;
+      case LUNAR_DAY:
+        d = getSolarDayByLunarDay(year);
+        break;
+      case TERM_DAY:
+        d = getSolarDayByTerm(year);
+        break;
+      case TERM_HS:
+        d = getSolarDayByTermHeavenStem(year);
+        break;
+      case TERM_EB:
+        d = getSolarDayByTermEarthBranch(year);
+        break;
+    }
+    if (null == d) {
+      return null;
+    }
+    int offset = EventManager.CHARS.indexOf(data.charAt(5)) - 31;
+    return 0 == offset ? d : d.next(offset);
+  }
+
+  protected SolarDay getSolarDayBySolarDay(int year) {
+    int y = year;
+    int m = EventManager.CHARS.indexOf(data.charAt(2)) - 31;
+    if (m > 12) {
+      m = 1;
+      y += 1;
+    }
+    int d = EventManager.CHARS.indexOf(data.charAt(3)) - 31;
+    int delay = EventManager.CHARS.indexOf(data.charAt(4)) - 31;
+    SolarMonth month = SolarMonth.fromYm(y, m);
+    int lastDay = month.getDayCount();
+    if (d > lastDay) {
+      if (0 == delay) {
+        return null;
+      } else if (delay < 0) {
+        return SolarDay.fromYmd(y, m, d + delay);
+      }
+      return SolarDay.fromYmd(y, m, lastDay).next(delay);
+    }
+    return SolarDay.fromYmd(y, m, d);
+  }
+
+  protected SolarDay getSolarDayByLunarDay(int year) {
+    int y = year;
+    int m = EventManager.CHARS.indexOf(data.charAt(2)) - 31;
+    if (m > 12) {
+      m = 1;
+      y += 1;
+    }
+    int d = EventManager.CHARS.indexOf(data.charAt(3)) - 31;
+    int delay = EventManager.CHARS.indexOf(data.charAt(4)) - 31;
+    LunarMonth month = LunarMonth.fromYm(y, m);
+    int lastDay = month.getDayCount();
+    if (d > lastDay) {
+      if (0 == delay) {
+        return null;
+      } else if (delay < 0) {
+        return LunarDay.fromYmd(y, m, d + delay).getSolarDay();
+      }
+      return LunarDay.fromYmd(y, m, lastDay).getSolarDay().next(delay);
+    }
+    return LunarDay.fromYmd(y, m, d).getSolarDay();
+  }
+
+  protected SolarDay getSolarDayByWeek(int year) {
+    // 第几个星期
+    int n = EventManager.CHARS.indexOf(data.charAt(3)) - 31;
+    if (n == 0) {
+      return null;
+    }
+    SolarMonth m = SolarMonth.fromYm(year, EventManager.CHARS.indexOf(data.charAt(2)) - 31);
+    // 星期几
+    int w = EventManager.CHARS.indexOf(data.charAt(4)) - 31;
+    if (n > 0) {
+      // 当月第1天
+      SolarDay d = m.getFirstDay();
+      // 往后找第几个星期几
+      return d.next(d.getWeek().stepsTo(w) + 7 * n - 7);
+    }
+    // 当月最后一天
+    SolarDay d = SolarDay.fromYmd(year, m.getMonth(), m.getDayCount());
+    // 往前找第几个星期几
+    return d.next(d.getWeek().stepsBackTo(w) + 7 * n + 7);
+  }
+
+  protected SolarDay getSolarDayByTerm(int year) {
+    int offset = EventManager.CHARS.indexOf(data.charAt(4)) - 31;
+    SolarDay d = SolarTerm.fromIndex(year, EventManager.CHARS.indexOf(data.charAt(2)) - 31).getSolarDay();
+    return 0 == offset ? d : d.next(offset);
+  }
+
+  protected SolarDay getSolarDayByTermHeavenStem(int year) {
+    SolarDay d = getSolarDayByTerm(year);
+    return d.next(d.getLunarDay().getSixtyCycle().getHeavenStem().stepsTo(EventManager.CHARS.indexOf(data.charAt(3)) - 31));
+  }
+
+  protected SolarDay getSolarDayByTermEarthBranch(int year) {
+    SolarDay d = getSolarDayByTerm(year);
+    return d.next(d.getLunarDay().getSixtyCycle().getEarthBranch().stepsTo(EventManager.CHARS.indexOf(data.charAt(3)) - 31));
+  }
+}

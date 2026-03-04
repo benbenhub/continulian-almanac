@@ -78,10 +78,9 @@ public class SolarWeek extends WeekUnit {
   }
 
   public SolarWeek next(int n) {
-    int d = index;
+    int d = index + n;
     SolarMonth m = getSolarMonth();
     if (n > 0) {
-      d += n;
       int weekCount = m.getWeekCount(start);
       while (d >= weekCount) {
         d -= weekCount;
@@ -92,7 +91,6 @@ public class SolarWeek extends WeekUnit {
         weekCount = m.getWeekCount(start);
       }
     } else if (n < 0) {
-      d += n;
       while (d < 0) {
         if (m.getFirstDay().getWeek().getIndex() != start) {
           d -= 1;

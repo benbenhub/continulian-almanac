@@ -21,34 +21,47 @@ public class RabByungYear extends AbstractTyme {
   protected int rabByungIndex;
 
   /**
-   * 干支
+   * 五行索引，从0开始
    */
-  protected SixtyCycle sixtyCycle;
+  protected int elementIndex;
 
-  public RabByungYear(int rabByungIndex, SixtyCycle sixtyCycle) {
+  /**
+   * 生肖索引，从0开始
+   */
+  protected int zodiacIndex;
+
+  public static void validate(int year) {
+    if (year < 1027 || year > 9999) {
+      throw new IllegalArgumentException(String.format("illegal rab-byung year: %d", year));
+    }
+  }
+
+  public RabByungYear(int rabByungIndex, int elementIndex, int zodiacIndex) {
     if (rabByungIndex < 0 || rabByungIndex > 150) {
       throw new IllegalArgumentException(String.format("illegal rab-byung index: %d", rabByungIndex));
     }
+    if (elementIndex < 0 || elementIndex >= RabByungElement.NAMES.length) {
+      throw new IllegalArgumentException(String.format("illegal element index: %d", elementIndex));
+    }
+    if (zodiacIndex < 0 || zodiacIndex >= Zodiac.NAMES.length) {
+      throw new IllegalArgumentException(String.format("illegal zodiac index: %d", zodiacIndex));
+    }
     this.rabByungIndex = rabByungIndex;
-    this.sixtyCycle = sixtyCycle;
+    this.elementIndex = elementIndex;
+    this.zodiacIndex = zodiacIndex;
   }
 
   public static RabByungYear fromSixtyCycle(int rabByungIndex, SixtyCycle sixtyCycle) {
-    return new RabByungYear(rabByungIndex, sixtyCycle);
+    return new RabByungYear(rabByungIndex, sixtyCycle.getHeavenStem().getElement().getIndex(), sixtyCycle.getEarthBranch().getZodiac().getIndex());
   }
 
   public static RabByungYear fromElementZodiac(int rabByungIndex, RabByungElement element, Zodiac zodiac) {
-    for (int i = 0; i < 60; i++) {
-      SixtyCycle sixtyCycle = SixtyCycle.fromIndex(i);
-      if (sixtyCycle.getEarthBranch().getZodiac().equals(zodiac) && sixtyCycle.getHeavenStem().getElement().getIndex() == element.getIndex()) {
-        return new RabByungYear(rabByungIndex, sixtyCycle);
-      }
-    }
-    throw new IllegalArgumentException(String.format("illegal rab-byung element %s, zodiac %s", element, zodiac));
+    return new RabByungYear(rabByungIndex, element.getIndex(), zodiac.getIndex());
   }
 
   public static RabByungYear fromYear(int year) {
-    return new RabByungYear((year - 1024) / 60, SixtyCycle.fromIndex(year - 4));
+    validate(year);
+    return fromSixtyCycle((year - 1024) / 60, SixtyCycle.fromIndex(year - 4));
   }
 
   /**
@@ -66,7 +79,7 @@ public class RabByungYear extends AbstractTyme {
    * @return 干支
    */
   public SixtyCycle getSixtyCycle() {
-    return sixtyCycle;
+    return SixtyCycle.fromIndex(6 * (elementIndex * 2 + zodiacIndex % 2) - 5 * zodiacIndex);
   }
 
   /**
@@ -75,7 +88,7 @@ public class RabByungYear extends AbstractTyme {
    * @return 生肖
    */
   public Zodiac getZodiac() {
-    return sixtyCycle.getEarthBranch().getZodiac();
+    return Zodiac.fromIndex(zodiacIndex);
   }
 
   /**
@@ -84,7 +97,7 @@ public class RabByungYear extends AbstractTyme {
    * @return 藏历五行
    */
   public RabByungElement getElement() {
-    return RabByungElement.fromIndex(sixtyCycle.getHeavenStem().getElement().getIndex());
+    return RabByungElement.fromIndex(elementIndex);
   }
 
   /**
@@ -125,7 +138,7 @@ public class RabByungYear extends AbstractTyme {
    * @return 年
    */
   public int getYear() {
-    return 1024 + rabByungIndex * 60 + sixtyCycle.getIndex();
+    return 1024 + rabByungIndex * 60 + getSixtyCycle().getIndex();
   }
 
   /**
@@ -136,13 +149,17 @@ public class RabByungYear extends AbstractTyme {
   public int getLeapMonth() {
     int y = 1;
     int m = 4;
-    int t = 0;
+    int t = 1;
     int currentYear = getYear();
     while (y < currentYear) {
-      int i = m - 1 + (t % 2 == 0 ? 33 : 32);
-      y = (y * 12 + i) / 12;
-      m = i % 12 + 1;
-      t++;
+      int i = m + 31 + t;
+      y += 2;
+      m = i - 23;
+      if (i > 35) {
+        y += 1;
+        m -= 12;
+      }
+      t = 1 - t;
     }
     return y == currentYear ? m : 0;
   }
@@ -162,7 +179,7 @@ public class RabByungYear extends AbstractTyme {
    * @return 藏历月
    */
   public RabByungMonth getFirstMonth() {
-    return new RabByungMonth(this, 1);
+    return RabByungMonth.fromYm(getYear(), 1);
   }
 
   /**
@@ -177,15 +194,16 @@ public class RabByungYear extends AbstractTyme {
   /**
    * 藏历月列表
    *
-   * @return 藏历月列表
+   * @return 藏历月列表，一般有12个月，当年有闰月时，有13个月。
    */
   public List<RabByungMonth> getMonths() {
-    List<RabByungMonth> l = new ArrayList<>();
+    List<RabByungMonth> l = new ArrayList<>(13);
+    int y = getYear();
     int leapMonth = getLeapMonth();
     for (int i = 1; i < 13; i++) {
-      l.add(new RabByungMonth(this, i));
+      l.add(RabByungMonth.fromYm(y, i));
       if (i == leapMonth) {
-        l.add(new RabByungMonth(this, -i));
+        l.add(RabByungMonth.fromYm(y, -i));
       }
     }
     return l;

@@ -102,13 +102,24 @@ public abstract class LoopTyme extends AbstractTyme {
   }
 
   /**
-   * 到目标索引的步数
+   * 到目标索引的步数（从左往右顺序）
    *
    * @param targetIndex 目标索引
-   * @return 步数
+   * @return 步数（>=0）
    */
   public int stepsTo(int targetIndex) {
     return indexOf(targetIndex - index);
+  }
+
+  /**
+   * 到目标索引的步数（从右往左逆序）
+   *
+   * @param targetIndex 目标索引
+   * @return 步数（<=0）
+   */
+  public int stepsBackTo(int targetIndex) {
+    int n = getSize();
+    return -((index - targetIndex + n) % n);
   }
 
 }

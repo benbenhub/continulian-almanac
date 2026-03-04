@@ -13,6 +13,7 @@ import com.tyme.culture.phenology.PhenologyDay;
 import com.tyme.culture.plumrain.PlumRain;
 import com.tyme.culture.plumrain.PlumRainDay;
 import com.tyme.enums.HideHeavenStemType;
+import com.tyme.event.Event;
 import com.tyme.festival.SolarFestival;
 import com.tyme.holiday.LegalHoliday;
 import com.tyme.jd.JulianDay;
@@ -112,10 +113,12 @@ public class SolarDay extends DayUnit {
    * @return true/false
    */
   public boolean isBefore(SolarDay target) {
-    if (year != target.getYear()) {
-      return year < target.getYear();
+    int y = target.getYear();
+    if (year != y) {
+      return year < y;
     }
-    return month != target.getMonth() ? month < target.getMonth() : day < target.getDay();
+    int m = target.getMonth();
+    return month != m ? month < m : day < target.getDay();
   }
 
   /**
@@ -125,10 +128,12 @@ public class SolarDay extends DayUnit {
    * @return true/false
    */
   public boolean isAfter(SolarDay target) {
-    if (year != target.getYear()) {
-      return year > target.getYear();
+    int y = target.getYear();
+    if (year != y) {
+      return year > y;
     }
-    return month != target.getMonth() ? month > target.getMonth() : day > target.getDay();
+    int m = target.getMonth();
+    return month != m ? month > m : day > target.getDay();
   }
 
   /**
@@ -202,37 +207,22 @@ public class SolarDay extends DayUnit {
    * @return 三伏天
    */
   public DogDay getDogDay() {
-    // 夏至
-    SolarTerm xiaZhi = SolarTerm.fromIndex(year, 12);
-    SolarDay start = xiaZhi.getSolarDay();
-    // 第3个庚日，即初伏第1天
-    start = start.next(start.getLunarDay().getSixtyCycle().getHeavenStem().stepsTo(6) + 20);
-    int days = subtract(start);
-    // 初伏以前
-    if (days < 0) {
+    // 初伏，夏至后第3个庚日
+    SolarDay d0 = Event.builder().termHeavenStem(12, 6, 20).build().getSolarDay(year);
+    // 中伏，夏至后第4个庚日
+    SolarDay d1 = Event.builder().termHeavenStem(12, 6, 30).build().getSolarDay(year);
+    // 末伏，立秋后第1个庚日
+    SolarDay d2 = Event.builder().termHeavenStem(15, 6, 0).build().getSolarDay(year);
+    if (isBefore(d0) || isAfter(d2.next(9))) {
       return null;
     }
-    if (days < 10) {
-      return new DogDay(Dog.fromIndex(0), days);
+    if (!isBefore(d2)) {
+      return new DogDay(Dog.fromIndex(2), subtract(d2));
     }
-    // 第4个庚日，中伏第1天
-    start = start.next(10);
-    days = subtract(start);
-    if (days < 10) {
-      return new DogDay(Dog.fromIndex(1), days);
+    if (!isBefore(d1)) {
+      return new DogDay(Dog.fromIndex(1), subtract(d1));
     }
-    // 第5个庚日，中伏第11天或末伏第1天
-    start = start.next(10);
-    days = subtract(start);
-    // 立秋
-    if (xiaZhi.next(3).getSolarDay().isAfter(start)) {
-      if (days < 10) {
-        return new DogDay(Dog.fromIndex(1), days + 10);
-      }
-      start = start.next(10);
-      days = subtract(start);
-    }
-    return days >= 10 ? null : new DogDay(Dog.fromIndex(2), days);
+    return new DogDay(Dog.fromIndex(0), subtract(d0));
   }
 
   /**
@@ -259,17 +249,10 @@ public class SolarDay extends DayUnit {
    * @return 梅雨天
    */
   public PlumRainDay getPlumRainDay() {
-    // 芒种
-    SolarTerm grainInEar = SolarTerm.fromIndex(year, 11);
-    SolarDay start = grainInEar.getSolarDay();
-    // 芒种后的第1个丙日
-    start = start.next(start.getLunarDay().getSixtyCycle().getHeavenStem().stepsTo(2));
-
-    // 小暑
-    SolarDay end = grainInEar.next(2).getSolarDay();
-    // 小暑后的第1个未日
-    end = end.next(end.getLunarDay().getSixtyCycle().getEarthBranch().stepsTo(7));
-
+    // 入梅，芒种后第1个丙日
+    SolarDay start = Event.builder().termHeavenStem(11, 2, 0).build().getSolarDay(year);
+    // 出梅，小暑后第1个未日
+    SolarDay end = Event.builder().termEarthBranch(13, 7, 0).build().getSolarDay(year);
     if (isBefore(start) || isAfter(end)) {
       return null;
     }

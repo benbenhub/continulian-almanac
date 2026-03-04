@@ -120,14 +120,17 @@ public class LunarHour extends SecondUnit {
    * @return true/false
    */
   public boolean isBefore(LunarHour target) {
-    LunarDay d = getLunarDay();
-    if (!d.equals(target.getLunarDay())) {
-      return d.isBefore(target.getLunarDay());
+    LunarDay d0 = getLunarDay();
+    LunarDay d1 = target.getLunarDay();
+    if (!d0.equals(d1)) {
+      return d0.isBefore(d1);
     }
-    if (hour != target.getHour()) {
-      return hour < target.getHour();
+    int h = target.getHour();
+    if (hour != h) {
+      return hour < h;
     }
-    return minute != target.getMinute() ? minute < target.getMinute() : second < target.getSecond();
+    int m = target.getMinute();
+    return minute != m ? minute < m : second < target.getSecond();
   }
 
   /**
@@ -137,14 +140,17 @@ public class LunarHour extends SecondUnit {
    * @return true/false
    */
   public boolean isAfter(LunarHour target) {
-    LunarDay d = getLunarDay();
-    if (!d.equals(target.getLunarDay())) {
-      return d.isAfter(target.getLunarDay());
+    LunarDay d0 = getLunarDay();
+    LunarDay d1 = target.getLunarDay();
+    if (!d0.equals(d1)) {
+      return d0.isAfter(d1);
     }
-    if (hour != target.getHour()) {
-      return hour > target.getHour();
+    int h = target.getHour();
+    if (hour != h) {
+      return hour > h;
     }
-    return minute != target.getMinute() ? minute > target.getMinute() : second > target.getSecond();
+    int m = target.getMinute();
+    return minute != m ? minute > m : second > target.getSecond();
   }
 
   /**
@@ -186,12 +192,13 @@ public class LunarHour extends SecondUnit {
    * @return 干支
    */
   public SixtyCycle getSixtyCycle() {
-    int earthBranchIndex = getIndexInDay() % 12;
-    SixtyCycle d = getLunarDay().getSixtyCycle();
+    int e = getIndexInDay();
+    HeavenStem h = getLunarDay().getSixtyCycle().getHeavenStem();
     if (hour >= 23) {
-      d = d.next(1);
+      h = h.next(1);
+      e = 0;
     }
-    return SixtyCycle.fromName(HeavenStem.fromIndex(d.getHeavenStem().getIndex() % 5 * 2 + earthBranchIndex).getName() + EarthBranch.fromIndex(earthBranchIndex).getName());
+    return SixtyCycle.fromIndex(h.getIndex() * 12 + e);
   }
 
   /**

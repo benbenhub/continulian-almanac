@@ -102,8 +102,7 @@ public class SixtyCycleYear extends AbstractTyme {
    * @return 干支月
    */
   public SixtyCycleMonth getFirstMonth() {
-    HeavenStem h = HeavenStem.fromIndex((getSixtyCycle().getHeavenStem().getIndex() + 1) * 2);
-    return new SixtyCycleMonth(this, SixtyCycle.fromName(h.getName() + "寅"));
+    return new SixtyCycleMonth(this, SixtyCycle.fromIndex(year * 12 - 46));
   }
 
   /**

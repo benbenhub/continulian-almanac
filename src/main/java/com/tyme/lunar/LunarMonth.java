@@ -5,8 +5,6 @@ import com.tyme.culture.fetus.FetusMonth;
 import com.tyme.culture.ren.MinorRen;
 import com.tyme.culture.star.nine.NineStar;
 import com.tyme.jd.JulianDay;
-import com.tyme.sixtycycle.EarthBranch;
-import com.tyme.sixtycycle.HeavenStem;
 import com.tyme.sixtycycle.SixtyCycle;
 import com.tyme.solar.SolarTerm;
 import com.tyme.unit.MonthUnit;
@@ -120,7 +118,7 @@ public class LunarMonth extends MonthUnit {
    */
   public int getIndexInYear() {
     int index = month - 1;
-    if (isLeap()) {
+    if (leap) {
       index += 1;
     } else {
       int leapMonth = getLunarYear().getLeapMonth();
@@ -260,7 +258,7 @@ public class LunarMonth extends MonthUnit {
    * @return 干支
    */
   public SixtyCycle getSixtyCycle() {
-    return SixtyCycle.fromName(HeavenStem.fromIndex(getLunarYear().getSixtyCycle().getHeavenStem().getIndex() * 2 + month + 1).getName() + EarthBranch.fromIndex(month + 1).getName());
+    return SixtyCycle.fromIndex(year * 12 + month - 47);
   }
 
   /**

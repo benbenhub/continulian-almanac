@@ -182,10 +182,13 @@ public class LunarYear extends YearUnit {
    */
   public List<LunarMonth> getMonths() {
     List<LunarMonth> l = new ArrayList<>(13);
-    LunarMonth m = getFirstMonth();
-    while (m.getYear() == year) {
-      l.add(m);
-      m = m.next(1);
+    int y = getYear();
+    int leapMonth = getLeapMonth();
+    for (int i = 1; i < 13; i++) {
+      l.add(LunarMonth.fromYm(y, i));
+      if (i == leapMonth) {
+        l.add(LunarMonth.fromYm(y, -i));
+      }
     }
     return l;
   }

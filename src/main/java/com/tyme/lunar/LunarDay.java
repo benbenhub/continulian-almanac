@@ -89,11 +89,14 @@ public class LunarDay extends DayUnit {
    * @return true/false
    */
   public boolean isBefore(LunarDay target) {
-    if (year != target.getYear()) {
-      return year < target.getYear();
+    int y = target.getYear();
+    if (year != y) {
+      return year < y;
     }
-    if (month != target.getMonth()) {
-      return Math.abs(month) < Math.abs(target.getMonth());
+    int m = target.getMonth();
+    if (month != m) {
+      int t = Math.abs(m);
+      return month == t || Math.abs(month) < t;
     }
     return day < target.getDay();
   }
@@ -105,11 +108,14 @@ public class LunarDay extends DayUnit {
    * @return true/false
    */
   public boolean isAfter(LunarDay target) {
-    if (year != target.getYear()) {
-      return year > target.getYear();
+    int y = target.getYear();
+    if (year != y) {
+      return year > y;
     }
-    if (month != target.getMonth()) {
-      return Math.abs(month) >= Math.abs(target.getMonth());
+    int m = target.getMonth();
+    if (month != m) {
+      int t = Math.abs(month);
+      return t == m || t > Math.abs(m);
     }
     return day > target.getDay();
   }
@@ -151,8 +157,7 @@ public class LunarDay extends DayUnit {
    * @return 干支
    */
   public SixtyCycle getSixtyCycle() {
-    int offset = (int) getLunarMonth().getFirstJulianDay().next(day - 12).getDay();
-    return SixtyCycle.fromName(HeavenStem.fromIndex(offset).getName() + EarthBranch.fromIndex(offset).getName());
+    return SixtyCycle.fromIndex((int) getLunarMonth().getFirstJulianDay().next(day - 12).getDay());
   }
 
   /**

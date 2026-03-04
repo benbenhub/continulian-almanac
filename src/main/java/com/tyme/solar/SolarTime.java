@@ -70,14 +70,17 @@ public class SolarTime extends SecondUnit {
    * @return true/false
    */
   public boolean isBefore(SolarTime target) {
-    SolarDay d = getSolarDay();
-    if (!d.equals(target.getSolarDay())) {
-      return d.isBefore(target.getSolarDay());
+    SolarDay d0 = getSolarDay();
+    SolarDay d1 = target.getSolarDay();
+    if (!d0.equals(d1)) {
+      return d0.isBefore(d1);
     }
-    if (hour != target.getHour()) {
-      return hour < target.getHour();
+    int h = target.getHour();
+    if (hour != h) {
+      return hour < h;
     }
-    return minute != target.getMinute() ? minute < target.getMinute() : second < target.getSecond();
+    int m = target.getMinute();
+    return minute != m ? minute < m : second < target.getSecond();
   }
 
   /**
@@ -87,14 +90,17 @@ public class SolarTime extends SecondUnit {
    * @return true/false
    */
   public boolean isAfter(SolarTime target) {
-    SolarDay d = getSolarDay();
-    if (!d.equals(target.getSolarDay())) {
-      return d.isAfter(target.getSolarDay());
+    SolarDay d0 = getSolarDay();
+    SolarDay d1 = target.getSolarDay();
+    if (!d0.equals(d1)) {
+      return d0.isAfter(d1);
     }
-    if (hour != target.getHour()) {
-      return hour > target.getHour();
+    int h = target.getHour();
+    if (hour != h) {
+      return hour > h;
     }
-    return minute != target.getMinute() ? minute > target.getMinute() : second > target.getSecond();
+    int m = target.getMinute();
+    return minute != m ? minute > m : second > target.getSecond();
   }
 
   /**

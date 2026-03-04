@@ -1,38 +1,25 @@
 package com.tyme.rabbyung;
 
-import com.tyme.AbstractTyme;
-import com.tyme.culture.Zodiac;
+import com.tyme.unit.MonthUnit;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 藏历月，仅支持藏历1950年十二月至藏历2050年十二月
  *
  * @author 6tail
  */
-public class RabByungMonth extends AbstractTyme {
+public class RabByungMonth extends MonthUnit {
   public static final String[] NAMES = {"正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"};
   public static final String[] ALIAS = {"神变月", "苦行月", "具香月", "萨嘎月", "作净月", "明净月", "具醉月", "具贤月", "天降月", "持众月", "庄严月", "满意月"};
-
-  /**
-   * 藏历年
-   */
-  protected RabByungYear year;
-
-  /**
-   * 月
-   */
-  protected int month;
 
   /**
    * 是否闰月
    */
   protected boolean leap;
-
-  /**
-   * 位于当年的索引，0-12
-   */
-  protected int indexInYear;
 
   protected static final Map<Integer, int[]> DAYS = new HashMap<>();
 
@@ -56,32 +43,21 @@ public class RabByungMonth extends AbstractTyme {
     }
   }
 
-  public RabByungMonth(RabByungYear year, int month) {
+  public static void validate(int year, int month) {
     if (month == 0 || month > 12 || month < -12) {
       throw new IllegalArgumentException(String.format("illegal rab-byung month: %d", month));
     }
-    int y = year.getYear();
-    if (y < 1950 || y > 2050) {
-      throw new IllegalArgumentException(String.format("rab-byung year %d must between 1950 and 2050", y));
-    }
-    int m = Math.abs(month);
-    if (y == 1950 && m < 12) {
-      throw new IllegalArgumentException(String.format("month %d must be 12 in rab-byung year %d", month, y));
+    if (year < 1950 || year > 2050) {
+      throw new IllegalArgumentException(String.format("rab-byung year %d must between 1950 and 2050", year));
     }
     boolean leap = month < 0;
-    int leapMonth = year.getLeapMonth();
-    if (leap && m != leapMonth) {
-      throw new IllegalArgumentException(String.format("illegal leap month %d in rab-byung year %d", m, y));
+    int m = Math.abs(month);
+    if (year == 1950 && m < 12) {
+      throw new IllegalArgumentException(String.format("month %d must be 12 in rab-byung year %d", month, year));
     }
-    this.year = year;
-    this.month = m;
-    this.leap = leap;
-    // 位于当年的索引
-    int index = m - 1;
-    if (leap || (0 < leapMonth && leapMonth < m)) {
-      index += 1;
+    if (leap && m != RabByungYear.fromYear(year).getLeapMonth()) {
+      throw new IllegalArgumentException(String.format("illegal leap month %d in rab-byung year %d", m, year));
     }
-    indexInYear = index;
   }
 
   /**
@@ -91,11 +67,10 @@ public class RabByungMonth extends AbstractTyme {
    * @param month 藏历月，闰月为负
    */
   public RabByungMonth(int year, int month) {
-    this(RabByungYear.fromYear(year), month);
-  }
-
-  public RabByungMonth(int rabByungIndex, RabByungElement element, Zodiac zodiac, int month) {
-    this(RabByungYear.fromElementZodiac(rabByungIndex, element, zodiac), month);
+    validate(year, month);
+    this.year = year;
+    this.month = Math.abs(month);
+    this.leap = month < 0;
   }
 
   /**
@@ -109,35 +84,13 @@ public class RabByungMonth extends AbstractTyme {
     return new RabByungMonth(year, month);
   }
 
-  public static RabByungMonth fromElementZodiac(int rabByungIndex, RabByungElement element, Zodiac zodiac, int month) {
-    return new RabByungMonth(rabByungIndex, element, zodiac, month);
-  }
-
   /**
    * 藏历年
    *
    * @return 藏历年
    */
   public RabByungYear getRabByungYear() {
-    return year;
-  }
-
-  /**
-   * 年
-   *
-   * @return 年
-   */
-  public int getYear() {
-    return year.getYear();
-  }
-
-  /**
-   * 月
-   *
-   * @return 月
-   */
-  public int getMonth() {
-    return month;
+    return RabByungYear.fromYear(year);
   }
 
   /**
@@ -155,7 +108,16 @@ public class RabByungMonth extends AbstractTyme {
    * @return 索引(0-12)
    */
   public int getIndexInYear() {
-    return indexInYear;
+    int index = month - 1;
+    if (leap) {
+      index += 1;
+    } else {
+      int leapMonth = getRabByungYear().getLeapMonth();
+      if (leapMonth > 0 && month > leapMonth) {
+        index += 1;
+      }
+    }
+    return index;
   }
 
   /**
@@ -187,15 +149,15 @@ public class RabByungMonth extends AbstractTyme {
 
   @Override
   public String toString() {
-    return year + getName();
+    return getRabByungYear() + getName();
   }
 
   public RabByungMonth next(int n) {
     if (n == 0) {
       return fromYm(getYear(), getMonthWithLeap());
     }
-    int m = indexInYear + 1 + n;
-    RabByungYear y = year;
+    int m = getIndexInYear() + 1 + n;
+    RabByungYear y = getRabByungYear();
     if (n > 0) {
       int monthCount = y.getMonthCount();
       while (m > monthCount) {
@@ -228,7 +190,7 @@ public class RabByungMonth extends AbstractTyme {
    * @return 藏历日
    */
   public RabByungDay getFirstDay() {
-    return new RabByungDay(this, 1);
+    return new RabByungDay(year, getMonthWithLeap(), 1);
   }
 
   /**
@@ -240,13 +202,14 @@ public class RabByungMonth extends AbstractTyme {
     List<RabByungDay> l = new ArrayList<>();
     List<Integer> missDays = getMissDays();
     List<Integer> leapDays = getLeapDays();
+    int m = getMonthWithLeap();
     for (int i = 1; i < 31; i++) {
       if (missDays.contains(i)) {
         continue;
       }
-      l.add(new RabByungDay(this, i));
+      l.add(new RabByungDay(year, m, i));
       if (leapDays.contains(i)) {
-        l.add(new RabByungDay(this, -i));
+        l.add(new RabByungDay(year, m, -i));
       }
     }
     return l;

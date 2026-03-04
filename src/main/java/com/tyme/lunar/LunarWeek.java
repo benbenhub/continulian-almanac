@@ -61,9 +61,6 @@ public class LunarWeek extends WeekUnit {
   }
 
   public LunarWeek next(int n) {
-    if (n == 0) {
-      return fromYm(getYear(), getMonth(), index, start);
-    }
     int d = index + n;
     LunarMonth m = getLunarMonth();
     if (n > 0) {

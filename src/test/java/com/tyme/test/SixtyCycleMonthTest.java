@@ -15,6 +15,8 @@ public class SixtyCycleMonthTest {
   public void test23() {
     SixtyCycleMonth month = SixtyCycleMonth.fromIndex(2025, 0);
     Assert.assertEquals("乙巳年戊寅月", month.toString());
+    Assert.assertEquals("乙巳年己卯月", month.next(1).toString());
+    Assert.assertEquals("甲辰年丁丑月", month.next(-1).toString());
   }
 
   @Test

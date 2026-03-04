@@ -185,4 +185,46 @@ public class LunarDayTest {
     Assert.assertEquals("己丑", lunar.getLunarMonth().getSixtyCycle().getName());
   }
 
+  @Test
+  public void test30() {
+    LunarDay d0 = LunarDay.fromYmd(2028, 4, 2);
+    LunarDay d1 = LunarDay.fromYmd(2028, 5, 2);
+    LunarDay d2 = LunarDay.fromYmd(2028, -5, 2);
+    LunarDay d3 = LunarDay.fromYmd(2028, 6, 2);
+    Assert.assertTrue(d0.isBefore(d1));
+    Assert.assertTrue(d0.isBefore(d2));
+    Assert.assertTrue(d0.isBefore(d3));
+    Assert.assertTrue(d1.isBefore(d2));
+    Assert.assertTrue(d1.isBefore(d3));
+    Assert.assertTrue(d2.isBefore(d3));
+
+    Assert.assertFalse(d3.isBefore(d2));
+    Assert.assertFalse(d3.isBefore(d1));
+    Assert.assertFalse(d3.isBefore(d0));
+    Assert.assertFalse(d2.isBefore(d1));
+    Assert.assertFalse(d2.isBefore(d0));
+    Assert.assertFalse(d1.isBefore(d0));
+  }
+
+  @Test
+  public void test31() {
+    LunarDay d0 = LunarDay.fromYmd(2028, 4, 2);
+    LunarDay d1 = LunarDay.fromYmd(2028, 5, 2);
+    LunarDay d2 = LunarDay.fromYmd(2028, -5, 2);
+    LunarDay d3 = LunarDay.fromYmd(2028, 6, 2);
+    Assert.assertTrue(d3.isAfter(d2));
+    Assert.assertTrue(d3.isAfter(d1));
+    Assert.assertTrue(d3.isAfter(d0));
+    Assert.assertTrue(d2.isAfter(d1));
+    Assert.assertTrue(d2.isAfter(d0));
+    Assert.assertTrue(d1.isAfter(d0));
+
+    Assert.assertFalse(d0.isAfter(d1));
+    Assert.assertFalse(d0.isAfter(d2));
+    Assert.assertFalse(d0.isAfter(d3));
+    Assert.assertFalse(d1.isAfter(d2));
+    Assert.assertFalse(d1.isAfter(d3));
+    Assert.assertFalse(d2.isAfter(d3));
+  }
+
 }
