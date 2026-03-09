@@ -59,7 +59,7 @@ public class EventManager {
    * @param event 事件
    */
   public static void update(String name, Event event) {
-    saveOrUpdate(name, event.getData() + (null == event.getName() ? name : event.getName()));
+    saveOrUpdate(name, event.getData() + (null == event.getName() || event.getName().isEmpty() ? name : event.getName()));
   }
 
   /**

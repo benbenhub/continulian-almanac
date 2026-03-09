@@ -122,4 +122,16 @@ public abstract class LoopTyme extends AbstractTyme {
     return -((index - targetIndex + n) % n);
   }
 
+  /**
+   * 到目标索引的最少步数
+   *
+   * @param targetIndex 目标索引
+   * @return 步数（从左往右顺序>=0，从右往左逆序<=0）
+   */
+  public int stepsCloseTo(int targetIndex) {
+    int d1 = stepsTo(targetIndex);
+    int d2 = stepsBackTo(targetIndex);
+    return d1 <= Math.abs(d2) ? d1 : d2;
+  }
+
 }

@@ -19,7 +19,7 @@ public class EventBuilder {
    */
   protected char[] data = {'@', '_', '_', '_', '_', '_', '0', '0', '0'};
 
-  protected EventBuilder name(String name) {
+  public EventBuilder name(String name) {
     this.name = name;
     return this;
   }
@@ -58,7 +58,7 @@ public class EventBuilder {
    * 农历日
    *
    * @param lunarMonth 农历月（-12至-1，1至12，闰月为负）
-   * @param lunarDay   公历日（1至30）
+   * @param lunarDay   农历日（1至30）
    * @param delayDays  顺延天数，例如生日在某月的三十，但下一年当月可能只有29天，是+1天，还是-1天（最远支持-31至31天）
    * @return 事件构建器
    */

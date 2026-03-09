@@ -220,7 +220,7 @@ public class LunarHour extends SecondUnit {
     SolarDay solar = d.getSolarDay();
     SolarTerm dongZhi = SolarTerm.fromIndex(solar.getYear(), 0);
     int earthBranchIndex = getIndexInDay() % 12;
-    int index = new int[]{8, 5, 2}[d.getSixtyCycle().getEarthBranch().getIndex() % 3];
+    int index = 8 - 3 * (d.getSixtyCycle().getEarthBranch().getIndex() % 3);
     if (!solar.isBefore(dongZhi.getJulianDay().getSolarDay()) && solar.isBefore(dongZhi.next(12).getJulianDay().getSolarDay())) {
       index = 8 + earthBranchIndex - index;
     } else {

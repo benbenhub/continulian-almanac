@@ -108,4 +108,14 @@ public class NineStarTest {
     Assert.assertEquals("三碧木", m.getNineStar().toString());
   }
 
+  @Test
+  public void test13() {
+    Assert.assertEquals("九紫火", SolarDay.fromYmd(2026, 6, 19).getLunarDay().getNineStar().toString());
+  }
+
+  @Test
+  public void test14() {
+    Assert.assertEquals("一白水", SolarDay.fromYmd(2026, 12, 16).getLunarDay().getNineStar().toString());
+  }
+
 }

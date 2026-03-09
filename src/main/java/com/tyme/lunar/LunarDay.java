@@ -181,33 +181,33 @@ public class LunarDay extends DayUnit {
   }
 
   /**
-   * 九星
+   * 九星（在冬至前后找到最近的甲子日为一白，往后二黑依次顺推；在夏至前后找到最近的甲子日为九紫，往后八白依次逆推。）
    *
    * @return 九星
    */
   public NineStar getNineStar() {
     SolarDay d = getSolarDay();
-    SolarTerm dongZhi = SolarTerm.fromIndex(d.getYear(), 0);
-    SolarDay dongZhiSolar = dongZhi.getSolarDay();
-    SolarDay xiaZhiSolar = dongZhi.next(12).getSolarDay();
-    SolarDay dongZhiSolar2 = dongZhi.next(24).getSolarDay();
-    int dongZhiIndex = dongZhiSolar.getLunarDay().getSixtyCycle().getIndex();
-    int xiaZhiIndex = xiaZhiSolar.getLunarDay().getSixtyCycle().getIndex();
-    int dongZhiIndex2 = dongZhiSolar2.getLunarDay().getSixtyCycle().getIndex();
-    SolarDay solarShunBai = dongZhiSolar.next(dongZhiIndex > 29 ? 60 - dongZhiIndex : -dongZhiIndex);
-    SolarDay solarShunBai2 = dongZhiSolar2.next(dongZhiIndex2 > 29 ? 60 - dongZhiIndex2 : -dongZhiIndex2);
-    SolarDay solarNiZi = xiaZhiSolar.next(xiaZhiIndex > 29 ? 60 - xiaZhiIndex : -xiaZhiIndex);
-    int offset = 0;
-    if (!d.isBefore(solarShunBai) && d.isBefore(solarNiZi)) {
-      offset = d.subtract(solarShunBai);
-    } else if (!d.isBefore(solarNiZi) && d.isBefore(solarShunBai2)) {
-      offset = 8 - d.subtract(solarNiZi);
-    } else if (!d.isBefore(solarShunBai2)) {
-      offset = d.subtract(solarShunBai2);
-    } else if (d.isBefore(solarShunBai)) {
-      offset = 8 + solarShunBai.subtract(d);
+    int y = d.getYear();
+    SolarDay winterSolstice = SolarTerm.fromIndex(y, 0).getSolarDay();
+    SolarDay summerSolstice = SolarTerm.fromIndex(y, 12).getSolarDay();
+    SolarDay nextWinterSolstice = SolarTerm.fromIndex(y + 1, 0).getSolarDay();
+    // 距冬至最近的甲子日
+    SolarDay w = winterSolstice.next(winterSolstice.getLunarDay().getSixtyCycle().stepsCloseTo(0));
+    // 距夏至最近的甲子日
+    SolarDay s = summerSolstice.next(summerSolstice.getLunarDay().getSixtyCycle().stepsCloseTo(0));
+    // 距下个冬至最近的甲子日
+    SolarDay n = nextWinterSolstice.next(nextWinterSolstice.getLunarDay().getSixtyCycle().stepsCloseTo(0));
+    // 43210012345678876543210012345
+    //      w        s        n
+    //     冬至     夏至      冬至
+    if (d.isBefore(w)) {
+      return NineStar.fromIndex(w.subtract(d) - 1);
+    } else if (d.isBefore(s)) {
+      return NineStar.fromIndex(d.subtract(w));
+    } else if (d.isBefore(n)) {
+      return NineStar.fromIndex(n.subtract(d) - 1);
     }
-    return NineStar.fromIndex(offset);
+    return NineStar.fromIndex(d.subtract(n));
   }
 
   /**
@@ -288,7 +288,7 @@ public class LunarDay extends DayUnit {
    * @return 二十八宿
    */
   public TwentyEightStar getTwentyEightStar() {
-    return TwentyEightStar.fromIndex(new int[]{10, 18, 26, 6, 14, 22, 2}[getSolarDay().getWeek().getIndex()]).next(-7 * getSixtyCycle().getEarthBranch().getIndex());
+    return TwentyEightStar.fromIndex(10 + 8 * getWeek().getIndex()).next(-7 * getSixtyCycle().getEarthBranch().getIndex());
   }
 
   /**
