@@ -219,10 +219,7 @@ public class SolarDay extends DayUnit {
     if (!isBefore(d2)) {
       return new DogDay(Dog.fromIndex(2), subtract(d2));
     }
-    if (!isBefore(d1)) {
-      return new DogDay(Dog.fromIndex(1), subtract(d1));
-    }
-    return new DogDay(Dog.fromIndex(0), subtract(d0));
+    return isBefore(d1) ? new DogDay(Dog.fromIndex(0), subtract(d0)) : new DogDay(Dog.fromIndex(1), subtract(d1));
   }
 
   /**

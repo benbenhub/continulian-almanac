@@ -202,12 +202,11 @@ public class LunarDay extends DayUnit {
     //     冬至     夏至      冬至
     if (d.isBefore(w)) {
       return NineStar.fromIndex(w.subtract(d) - 1);
-    } else if (d.isBefore(s)) {
-      return NineStar.fromIndex(d.subtract(w));
-    } else if (d.isBefore(n)) {
-      return NineStar.fromIndex(n.subtract(d) - 1);
     }
-    return NineStar.fromIndex(d.subtract(n));
+    if (d.isBefore(s)) {
+      return NineStar.fromIndex(d.subtract(w));
+    }
+    return NineStar.fromIndex(d.isBefore(n) ? n.subtract(d) - 1 : d.subtract(n));
   }
 
   /**

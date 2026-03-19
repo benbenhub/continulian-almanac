@@ -34,15 +34,15 @@ public class SolarFestivalTest {
   public void test2() {
     SolarFestival f = SolarFestival.fromIndex(2023, 0);
     Assert.assertNotNull(f);
-    Assert.assertEquals("2024年5月1日 五一劳动节", f.next(13).toString());
-    Assert.assertEquals("2022年8月1日 八一建军节", f.next(-3).toString());
+    Assert.assertEquals("2024年5月1日 劳动节", f.next(13).toString());
+    Assert.assertEquals("2022年8月1日 建军节", f.next(-3).toString());
   }
 
   @Test
   public void test3() {
     SolarFestival f = SolarFestival.fromIndex(2023, 0);
     Assert.assertNotNull(f);
-    Assert.assertEquals("2022年3月8日 三八妇女节", f.next(-9).toString());
+    Assert.assertEquals("2022年3月8日 妇女节", f.next(-9).toString());
   }
 
   @Test
@@ -56,7 +56,7 @@ public class SolarFestivalTest {
   public void test5() {
     SolarFestival f = SolarDay.fromYmd(2021, 5, 4).getFestival();
     Assert.assertNotNull(f);
-    Assert.assertEquals("2021年5月4日 五四青年节", f.toString());
+    Assert.assertEquals("2021年5月4日 青年节", f.toString());
   }
 
   @Test

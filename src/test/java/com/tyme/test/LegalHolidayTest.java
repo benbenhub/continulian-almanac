@@ -40,7 +40,7 @@ public class LegalHolidayTest {
   public void test3() {
     LegalHoliday d = LegalHoliday.fromYmd(2001, 12, 29);
     Assert.assertNotNull(d);
-    Assert.assertEquals("2001年12月29日 元旦节(班)", d.toString());
+    Assert.assertEquals("2001年12月29日 元旦(班)", d.toString());
     Assert.assertNull(d.next(-1));
   }
 

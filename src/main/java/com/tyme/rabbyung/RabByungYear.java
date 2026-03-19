@@ -121,11 +121,10 @@ public class RabByungYear extends AbstractTyme {
       n /= 10;
       pos++;
     }
-    String letter = s.toString();
-    if (letter.startsWith("一十")) {
-      letter = letter.substring(1);
+    if (0 == s.indexOf("一十")) {
+      s.delete(0, 1);
     }
-    return String.format("第%s饶迥%s%s年", letter, getElement(), getZodiac());
+    return String.format("第%s饶迥%s%s年", s, getElement(), getZodiac());
   }
 
   public RabByungYear next(int n) {

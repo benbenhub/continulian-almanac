@@ -26,7 +26,8 @@ public class RabByungDay extends DayUnit {
     int d = Math.abs(day);
     if (leap && !m.getLeapDays().contains(d)) {
       throw new IllegalArgumentException(String.format("illegal leap day %d in %s", d, m));
-    } else if (!leap && m.getMissDays().contains(d)) {
+    }
+    if (!leap && m.getMissDays().contains(d)) {
       throw new IllegalArgumentException(String.format("illegal day %d in %s", d, m));
     }
   }

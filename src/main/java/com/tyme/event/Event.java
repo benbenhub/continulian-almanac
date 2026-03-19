@@ -55,10 +55,7 @@ public class Event extends AbstractCulture {
 
   public static Event fromName(String name) {
     Matcher matcher = Pattern.compile(String.format(EventManager.REGEX, name)).matcher(EventManager.DATA);
-    if (!matcher.find()) {
-      return null;
-    }
-    return new Event(name, matcher.group(1));
+    return matcher.find() ? new Event(name, matcher.group(1)) : null;
   }
 
   /**
@@ -188,10 +185,8 @@ public class Event extends AbstractCulture {
     if (d > lastDay) {
       if (0 == delay) {
         return null;
-      } else if (delay < 0) {
-        return SolarDay.fromYmd(y, m, d + delay);
       }
-      return SolarDay.fromYmd(y, m, lastDay).next(delay);
+      return delay < 0 ? SolarDay.fromYmd(y, m, d + delay) : SolarDay.fromYmd(y, m, lastDay).next(delay);
     }
     return SolarDay.fromYmd(y, m, d);
   }
@@ -210,10 +205,8 @@ public class Event extends AbstractCulture {
     if (d > lastDay) {
       if (0 == delay) {
         return null;
-      } else if (delay < 0) {
-        return LunarDay.fromYmd(y, m, d + delay).getSolarDay();
       }
-      return LunarDay.fromYmd(y, m, lastDay).getSolarDay().next(delay);
+      return delay < 0 ? LunarDay.fromYmd(y, m, d + delay).getSolarDay() : LunarDay.fromYmd(y, m, lastDay).getSolarDay().next(delay);
     }
     return LunarDay.fromYmd(y, m, d).getSolarDay();
   }

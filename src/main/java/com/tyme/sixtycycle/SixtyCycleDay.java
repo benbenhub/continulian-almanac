@@ -146,12 +146,11 @@ public class SixtyCycleDay extends AbstractTyme {
     SolarDay n = nextWinterSolstice.next(nextWinterSolstice.getLunarDay().getSixtyCycle().stepsCloseTo(0));
     if (solarDay.isBefore(w)) {
       return NineStar.fromIndex(w.subtract(solarDay) - 1);
-    } else if (solarDay.isBefore(s)) {
-      return NineStar.fromIndex(solarDay.subtract(w));
-    } else if (solarDay.isBefore(n)) {
-      return NineStar.fromIndex(n.subtract(solarDay) - 1);
     }
-    return NineStar.fromIndex(solarDay.subtract(n));
+    if (solarDay.isBefore(s)) {
+      return NineStar.fromIndex(solarDay.subtract(w));
+    }
+    return NineStar.fromIndex(solarDay.isBefore(n) ? n.subtract(solarDay) - 1 : solarDay.subtract(n));
   }
 
   /**
