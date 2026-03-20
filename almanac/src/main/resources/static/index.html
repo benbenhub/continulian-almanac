@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排盘与黄历系统 - 基于 Tyme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+        }
+      }
+    </script>
+    <style>
+        .pillar-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-right: 1px solid #fed7aa;
+            padding: 0.5rem;
+        }
+        .pillar-col:last-child {
+            border-right: none;
+        }
+        .bazi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border: 1px solid #fed7aa;
+            border-radius: 0.5rem;
+        }
+        .element-wood { color: #16a34a; }
+        .element-fire { color: #dc2626; }
+        .element-earth { color: #d97706; }
+        .element-metal { color: #ca8a04; }
+        .element-water { color: #2563eb; }
+        [v-cloak] { display: none; }
+    </style>
+</head>
+<body class="bg-amber-50 p-4 md:p-8 font-sans">
+    <div id="app" v-cloak class="max-w-6xl mx-auto space-y-6">
+        <header class="bg-white rounded-xl shadow-sm p-6 text-center border-t-4 border-red-600">
+            <h1 class="text-3xl font-bold text-gray-800 tracking-wider">八字排盘与传统黄历系统</h1>
+            <p class="text-gray-500 mt-2">依靠 Tyme 强大的历法库构建</p>
+        </header>
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-wrap gap-6 items-end justify-center">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">公历日期</label>
+                <input type="date" v-model="dateInput" class="border border-gray-300 rounded-md p-2 w-48 focus:ring-red-500 focus:border-red-500 outline-none transition">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">公历时间</label>
+                <input type="time" v-model="timeInput" class="border border-gray-300 rounded-md p-2 w-32 focus:ring-red-500 focus:border-red-500 outline-none transition">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">性别</label>
+                <select v-model="gender" class="border border-gray-300 rounded-md p-2 w-24 focus:ring-red-500 focus:border-red-500 outline-none transition">
+                    <option value="1">男 (乾造)</option>
+                    <option value="0">女 (坤造)</option>
+                </select>
+            </div>
+            <button @click="calculate" :disabled="loading" class="bg-red-600 text-white px-8 py-2 rounded-md hover:bg-red-700 transition font-bold tracking-widest shadow-sm disabled:opacity-50">
+                {{ loading ? '计算中...' : '开始排盘' }}
+            </button>
+        </div>
+        <div v-if="result" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-5 space-y-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-xl font-bold border-b border-gray-100 pb-3 mb-4 flex items-center text-red-800">农历信息</h2>
+                    <div class="space-y-3 text-gray-700">
+                        <p class="flex justify-between"><span class="text-gray-500">公历：</span> <span class="font-medium">{{ result.lunar.solarStr }} {{ result.lunar.week }}</span></p>
+                        <p class="flex justify-between"><span class="text-gray-500">农历：</span> <span class="font-medium text-red-700">{{ result.lunar.yearName }}年 {{ result.lunar.monthName }} {{ result.lunar.dayName }}</span></p>
+                        <p class="flex justify-between"><span class="text-gray-500">干支：</span> <span class="font-medium">{{ result.lunar.yearGz }}年 {{ result.lunar.monthGz }}月 {{ result.lunar.dayGz }}日 {{ result.lunar.hourGz }}时</span></p>
+                        <p class="flex justify-between"><span class="text-gray-500">生肖：</span> <span class="font-medium">{{ result.lunar.zodiac }}</span></p>
+                        <p class="flex justify-between"><span class="text-gray-500">节气：</span> <span class="font-medium text-green-700">{{ result.lunar.solarTerm }}</span></p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-xl font-bold border-b border-gray-100 pb-3 mb-4 flex items-center text-red-800">今日黄历</h2>
+                    <div class="space-y-4 text-sm">
+                        <div class="flex flex-col gap-3">
+                            <div class="flex items-start">
+                                <div class="bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold mr-3 shrink-0 text-xs mt-0.5">宜</div>
+                                <p class="leading-relaxed text-gray-800">{{ result.almanac.yi }}</p>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-red-100 text-red-700 px-2 py-1 rounded-full font-bold mr-3 shrink-0 text-xs mt-0.5">忌</div>
+                                <p class="leading-relaxed text-gray-800">{{ result.almanac.ji }}</p>
+                            </div>
+                        </div>
+                        <div class="border-t border-dashed border-gray-200 my-2"></div>
+                        <div class="grid grid-cols-2 gap-y-3">
+                            <p><span class="text-gray-500 block text-xs">冲煞</span><span class="font-medium">{{ result.almanac.chong }} {{ result.almanac.sha }}</span></p>
+                            <p><span class="text-gray-500 block text-xs">彭祖百忌</span><span class="font-medium">{{ result.almanac.pengzu }}</span></p>
+                            <p class="col-span-2"><span class="text-gray-500 block text-xs">吉神宜趋</span><span class="font-medium text-green-700">{{ result.almanac.jishen }}</span></p>
+                            <p class="col-span-2"><span class="text-gray-500 block text-xs">凶神宜忌</span><span class="font-medium text-red-700">{{ result.almanac.xiongshen }}</span></p>
+                            <p><span class="text-gray-500 block text-xs">胎神占方</span><span class="font-medium">{{ result.almanac.taishen }}</span></p>
+                            <p><span class="text-gray-500 block text-xs">九星</span><span class="font-medium">{{ result.almanac.jiuxing }}</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:col-span-7 bg-white rounded-xl shadow-sm p-6">
+                <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-6">
+                    <h2 class="text-xl font-bold text-red-800 flex items-center">八字排盘 ({{ gender == '1' ? '乾造' : '坤造' }})</h2>
+                    <span class="text-sm text-gray-500">此局起于: {{ result.lunar.solarStr }}</span>
+                </div>
+                <div class="bazi-grid bg-amber-50/30 overflow-hidden shadow-inner">
+                    <div class="pillar-col font-bold text-gray-600 bg-amber-100/50 py-3">年柱</div>
+                    <div class="pillar-col font-bold text-gray-600 bg-amber-100/50 py-3">月柱</div>
+                    <div class="pillar-col font-bold text-red-600 bg-amber-100/50 py-3">日柱 (元{{ gender == '1' ? '男' : '女' }})</div>
+                    <div class="pillar-col font-bold text-gray-600 bg-amber-100/50 py-3">时柱</div>
+                    <div class="pillar-col text-sm text-gray-500 pt-4" v-for="p in result.bazi.pillars" :key="'main-'+p.name">{{ p.mainStar }}</div>
+                    <div class="pillar-col text-4xl font-bold py-3" v-for="p in result.bazi.pillars" :key="'stem-'+p.name" :class="getElementClass(p.stemElement)">{{ p.stem }}</div>
+                    <div class="pillar-col text-4xl font-bold py-3" v-for="p in result.bazi.pillars" :key="'branch-'+p.name" :class="getElementClass(p.branchElement)">{{ p.branch }}</div>
+                    <div class="pillar-col text-base text-gray-700 py-2 space-y-1" v-for="p in result.bazi.pillars" :key="'hidden-'+p.name">
+                        <div v-for="(h, idx) in p.hiddenStems" :key="idx" class="flex items-center gap-1 justify-center w-full">
+                            <span :class="getElementClass(h.element)" class="font-medium">{{ h.stem }}</span>
+                        </div>
+                    </div>
+                    <div class="pillar-col text-xs text-gray-500 pb-2 space-y-2" v-for="p in result.bazi.pillars" :key="'sub-'+p.name">
+                        <div v-for="(h, idx) in p.hiddenStems" :key="'s'+idx" class="h-4">{{ h.star }}</div>
+                    </div>
+                    <div class="pillar-col text-sm font-medium text-gray-600 mt-2 bg-white/50 border-t border-amber-100 py-2" v-for="p in result.bazi.pillars" :key="'terrain-'+p.name">{{ p.terrain }}</div>
+                    <div class="pillar-col text-sm text-purple-700 bg-white/50 py-2" v-for="p in result.bazi.pillars" :key="'nayin-'+p.name">{{ p.nayin }}</div>
+                    <div class="pillar-col text-sm text-red-500 bg-white/50 pb-3" v-for="p in result.bazi.pillars" :key="'empty-'+p.name">{{ p.emptiness || '无' }}</div>
+                </div>
+                <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                        <p class="text-xs text-gray-500 mb-1">胎元</p>
+                        <p class="font-bold text-gray-800">{{ result.bazi.taiYuan }}</p>
+                        <p class="text-xs text-purple-600 mt-1">{{ result.bazi.taiYuanNayin }}</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                        <p class="text-xs text-gray-500 mb-1">胎息</p>
+                        <p class="font-bold text-gray-800">{{ result.bazi.taiXi }}</p>
+                        <p class="text-xs text-purple-600 mt-1">{{ result.bazi.taiXiNayin }}</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                        <p class="text-xs text-gray-500 mb-1">命宫</p>
+                        <p class="font-bold text-gray-800">{{ result.bazi.mingGong }}</p>
+                        <p class="text-xs text-purple-600 mt-1">{{ result.bazi.mingGongNayin }}</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                        <p class="text-xs text-gray-500 mb-1">身宫</p>
+                        <p class="font-bold text-gray-800">{{ result.bazi.shenGong }}</p>
+                        <p class="text-xs text-purple-600 mt-1">{{ result.bazi.shenGongNayin }}</p>
+                    </div>
+                </div>
+                <div class="mt-6 bg-red-50 rounded-lg p-4 border border-red-100">
+                    <p class="text-sm text-gray-800 text-center"><span class="font-bold text-red-800">起运：</span>{{ result.bazi.childLimitText }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        import { createApp, ref, onMounted } from 'vue';
+        createApp({
+            setup() {
+                const now = new Date();
+                const dateInput = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`);
+                const timeInput = ref(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
+                const gender = ref("1");
+                const result = ref(null);
+                const loading = ref(false);
+                const getElementClass = (element) => {
+                    const map = { '木': 'element-wood', '火': 'element-fire', '土': 'element-earth', '金': 'element-metal', '水': 'element-water' };
+                    return map[element] || '';
+                };
+                const calculate = async () => {
+                    if (!dateInput.value || !timeInput.value) return;
+                    loading.value = true;
+                    try {
+                        const res = await fetch(`/api/calculate?date=${dateInput.value}&time=${timeInput.value}&gender=${gender.value}`);
+                        if (!res.ok) throw new Error('API Error: ' + res.statusText);
+                        const data = await res.json();
+                        if (data.error) throw new Error(data.error);
+                        result.value = data;
+                    } catch (e) {
+                        alert("排盘失败：" + e.message);
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+                onMounted(() => calculate());
+                return { dateInput, timeInput, gender, result, loading, calculate, getElementClass };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
