@@ -49,7 +49,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.tyme.demo.AlmanacServer</mainClass>
+                            <mainClass>com.almanac.server.AlmanacServer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

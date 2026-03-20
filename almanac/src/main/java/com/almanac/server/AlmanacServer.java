@@ -1,4 +1,4 @@
-package com.tyme.demo;
+package com.almanac.server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
