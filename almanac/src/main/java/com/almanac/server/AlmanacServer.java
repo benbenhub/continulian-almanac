@@ -41,16 +41,63 @@ public class AlmanacServer {
     static class HtmlHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
-            if (!"/".equals(t.getRequestURI().getPath())) {
+            String path = t.getRequestURI().getPath();
+            if (path == null || path.isEmpty()) {
+                path = "/";
+            }
+            if ("/".equals(path)) {
+                path = "/index.html";
+            }
+            if (path.contains("..")) {
+                t.sendResponseHeaders(400, -1);
+                return;
+            }
+
+            String resourcePath = "/static" + path;
+            byte[] bytes;
+            try {
+                bytes = ResourceReader.read(resourcePath);
+            } catch (IOException e) {
                 t.sendResponseHeaders(404, -1);
                 return;
             }
-            byte[] bytes = ResourceReader.read("/static/index.html");
-            t.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
+
+            String contentType = getContentType(path);
+            if (contentType != null) {
+                t.getResponseHeaders().add("Content-Type", contentType);
+            }
             t.sendResponseHeaders(200, bytes.length);
             OutputStream os = t.getResponseBody();
             os.write(bytes);
             os.close();
+        }
+
+        private String getContentType(String path) {
+            if (path.endsWith(".html")) {
+                return "text/html; charset=UTF-8";
+            }
+            if (path.endsWith(".css")) {
+                return "text/css; charset=UTF-8";
+            }
+            if (path.endsWith(".js")) {
+                return "application/javascript; charset=UTF-8";
+            }
+            if (path.endsWith(".json")) {
+                return "application/json; charset=UTF-8";
+            }
+            if (path.endsWith(".png")) {
+                return "image/png";
+            }
+            if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
+                return "image/jpeg";
+            }
+            if (path.endsWith(".svg")) {
+                return "image/svg+xml";
+            }
+            if (path.endsWith(".ico")) {
+                return "image/x-icon";
+            }
+            return null;
         }
     }
 

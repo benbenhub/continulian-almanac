@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>八字排盘 - 命理文化网</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">
+                <h1>命理文化</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="/">首页</a></li>
+                    <li><a href="/bazi.html" class="active">八字排盘</a></li>
+                    <li><a href="#" >命理知识</a></li>
+                    <li><a href="#" >关于我们</a></li>
+                </ul>
+            </nav>
+            <div class="user-entry">
+                <button class="login-btn">登录</button>
+                <button class="register-btn">注册</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content bazi-page" id="bazi-page">
+        <div class="bazi-container">
+            <section class="calc-card">
+                <div class="calc-card-title-row">
+                    <h2 class="calc-card-title">八字排盘</h2>
+                    <div class="calc-subtitle" id="bazi-subtitle"></div>
+                </div>
+
+                <form class="calc-form bazi-form" id="bazi-form">
+                    <label class="calc-field">
+                        <span class="calc-label">公历日期</span>
+                        <input class="calc-input" type="date" id="bazi-date" required>
+                    </label>
+                    <label class="calc-field">
+                        <span class="calc-label">公历时间</span>
+                        <input class="calc-input" type="time" id="bazi-time" required>
+                    </label>
+                    <label class="calc-field">
+                        <span class="calc-label">性别</span>
+                        <select class="calc-input" id="bazi-gender" required>
+                            <option value="1">男 (乾造)</option>
+                            <option value="0">女 (坤造)</option>
+                        </select>
+                    </label>
+                    <button class="calc-submit" type="submit" id="bazi-submit">开始排盘</button>
+                </form>
+
+                <div class="calc-loading" id="bazi-loading" hidden>计算中...</div>
+                <div class="calc-error" id="bazi-error" hidden></div>
+
+                <div class="calc-result" id="bazi-result" hidden>
+                    <div class="bazi-grid" id="bazi-grid"></div>
+                    <div class="bazi-extra" id="bazi-extra"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
