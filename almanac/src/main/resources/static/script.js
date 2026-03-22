@@ -36,7 +36,12 @@ function getElementClass(element) {
         '火': 'element-fire',
         '土': 'element-earth',
         '金': 'element-metal',
-        '水': 'element-water'
+        '水': 'element-water',
+        '甲': 'element-wood', '乙': 'element-wood', '寅': 'element-wood', '卯': 'element-wood',
+        '丙': 'element-fire', '丁': 'element-fire', '巳': 'element-fire', '午': 'element-fire',
+        '戊': 'element-earth', '己': 'element-earth', '辰': 'element-earth', '戌': 'element-earth', '丑': 'element-earth', '未': 'element-earth',
+        '庚': 'element-metal', '辛': 'element-metal', '申': 'element-metal', '酉': 'element-metal',
+        '壬': 'element-water', '癸': 'element-water', '亥': 'element-water', '子': 'element-water'
     };
     return map[element] || '';
 }
@@ -83,9 +88,10 @@ class TraditionalAstrologyWebsite {
         this.baziLoadingEl = document.getElementById('bazi-loading');
         this.baziErrorEl = document.getElementById('bazi-error');
         this.baziResultEl = document.getElementById('bazi-result');
-        this.baziSubtitleEl = document.getElementById('bazi-subtitle');
+        this.baziSummaryTableEl = document.getElementById('bazi-summary-table');
         this.baziGridEl = document.getElementById('bazi-grid');
         this.baziExtraEl = document.getElementById('bazi-extra');
+        this.baziDayunEl = document.getElementById('bazi-dayun');
     }
 
     tick() {
@@ -212,36 +218,6 @@ class TraditionalAstrologyWebsite {
             });
         });
 
-        const primaryBtn = document.querySelector('.primary-btn');
-        if (primaryBtn) {
-            primaryBtn.addEventListener('click', () => {
-                const href = primaryBtn.getAttribute('href');
-                if (href) {
-                    window.location.href = href;
-                    return;
-                }
-            });
-        }
-
-        const quickForm = document.querySelector('.quick-form');
-        if (quickForm) {
-            quickForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const birthDate = quickForm.querySelector('input[type="date"]').value;
-                const birthTime = quickForm.querySelector('input[type="time"]').value;
-                if (!birthDate || !birthTime) {
-                    alert('请填写完整的出生日期和时间');
-                    return;
-                }
-                const url = `/bazi.html?date=${encodeURIComponent(birthDate)}&time=${encodeURIComponent(birthTime)}&gender=${encodeURIComponent(this.defaultGender)}`;
-                window.location.href = url;
-            });
-        }
-
-        const loginBtn = document.querySelector('.login-btn');
-        const registerBtn = document.querySelector('.register-btn');
-        if (loginBtn) loginBtn.addEventListener('click', () => this.showSimpleModal('用户登录'));
-        if (registerBtn) registerBtn.addEventListener('click', () => this.showSimpleModal('用户注册'));
     }
 
     async fetchCalculate(dateStr, timeStr, gender) {
@@ -286,25 +262,30 @@ class TraditionalAstrologyWebsite {
         if (!root) return;
         root.innerHTML = '';
 
+        root.appendChild(this.addBaziCell('', 'bazi-row-label'));
         const headers = ['年柱', '月柱', '日柱', '时柱'];
         for (const h of headers) {
             root.appendChild(this.addBaziCell(h, 'bazi-head'));
         }
 
+        root.appendChild(this.addBaziCell('主星', 'bazi-row-label'));
         for (const p of pillars) {
             root.appendChild(this.addBaziCell(p.mainStar || '', 'bazi-sub'));
         }
 
+        root.appendChild(this.addBaziCell('天干', 'bazi-row-label'));
         for (const p of pillars) {
             const c = this.addBaziCell(p.stem || '', 'bazi-stem', getElementClass(p.stemElement));
             root.appendChild(c);
         }
 
+        root.appendChild(this.addBaziCell('地支', 'bazi-row-label'));
         for (const p of pillars) {
             const c = this.addBaziCell(p.branch || '', 'bazi-branch', getElementClass(p.branchElement));
             root.appendChild(c);
         }
 
+        root.appendChild(this.addBaziCell('藏干', 'bazi-row-label'));
         for (const p of pillars) {
             const cell = this.addBaziCell('', 'bazi-meta');
             const wrap = document.createElement('div');
@@ -319,77 +300,80 @@ class TraditionalAstrologyWebsite {
             root.appendChild(cell);
         }
 
+        root.appendChild(this.addBaziCell('副星', 'bazi-row-label'));
         for (const p of pillars) {
-            const stars = (p.hiddenStems || []).map(h => h.star).filter(Boolean).join(' ');
-            root.appendChild(this.addBaziCell(stars || '', 'bazi-meta'));
+            const cell = this.addBaziCell('', 'bazi-meta');
+            const wrap = document.createElement('div');
+            wrap.className = 'bazi-hidden bazi-sub-star';
+            for (const h of p.hiddenStems || []) {
+                const s = document.createElement('span');
+                s.textContent = h.star;
+                wrap.appendChild(s);
+            }
+            cell.appendChild(wrap);
+            root.appendChild(cell);
         }
 
+        root.appendChild(this.addBaziCell('星运', 'bazi-row-label'));
         for (const p of pillars) {
             root.appendChild(this.addBaziCell(p.terrain || '', 'bazi-meta'));
         }
 
+        root.appendChild(this.addBaziCell('纳音', 'bazi-row-label'));
         for (const p of pillars) {
             root.appendChild(this.addBaziCell(p.nayin || '', 'bazi-meta'));
         }
 
+        root.appendChild(this.addBaziCell('空亡', 'bazi-row-label'));
         for (const p of pillars) {
             root.appendChild(this.addBaziCell(p.emptiness || '无', 'bazi-meta'));
         }
     }
 
     renderBaziExtra(bazi, container) {
-        const root = container || this.baziExtraEl;
-        if (!root) return;
-        root.innerHTML = '';
+        if (!container) return;
+        container.innerHTML = `
+            <div class="bazi-extra-item"><strong>胎元：</strong>${bazi.taiYuan || ''} (${bazi.taiYuanNayin || ''})</div>
+            <div class="bazi-extra-item"><strong>胎息：</strong>${bazi.taiXi || ''} (${bazi.taiXiNayin || ''})</div>
+            <div class="bazi-extra-item"><strong>命宫：</strong>${bazi.mingGong || ''} (${bazi.mingGongNayin || ''})</div>
+            <div class="bazi-extra-item"><strong>身宫：</strong>${bazi.shenGong || ''} (${bazi.shenGongNayin || ''})</div>
+            <div class="bazi-extra-item" style="flex: 1 1 100%; text-align: left; padding-left: 1rem;">
+                <strong>起运：</strong>${bazi.childLimitText || ''}
+            </div>
+        `;
+    }
 
-        const items = [
-            { key: '胎元', value: bazi.taiYuan, sub: bazi.taiYuanNayin },
-            { key: '胎息', value: bazi.taiXi, sub: bazi.taiXiNayin },
-            { key: '命宫', value: bazi.mingGong, sub: bazi.mingGongNayin },
-            { key: '身宫', value: bazi.shenGong, sub: bazi.shenGongNayin }
-        ];
-
-        for (const it of items) {
-            const card = document.createElement('div');
-            card.className = 'bazi-extra-item';
-
-            const k = document.createElement('div');
-            k.className = 'bazi-extra-key';
-            k.textContent = it.key;
-
-            const v = document.createElement('div');
-            v.className = 'bazi-extra-value';
-            v.textContent = it.value || '';
-
-            const sub = document.createElement('div');
-            sub.className = 'bazi-extra-sub';
-            sub.textContent = it.sub || '';
-
-            card.appendChild(k);
-            card.appendChild(v);
-            if (it.sub) card.appendChild(sub);
-            root.appendChild(card);
+    renderBaziDayun(dayuns, container) {
+        if (!container || !dayuns || !dayuns.length) return;
+        
+        let html = '<h3 class="bazi-section-title">大运流年</h3><div class="bazi-dayun-grid">';
+        
+        for (const dy of dayuns) {
+            html += `<div class="bazi-dayun-col">
+                <div class="dy-header">
+                    <div class="dy-star">${dy.mainStar}</div>
+                    <div class="dy-name">
+                        <span class="${getElementClass(dy.stem)}">${dy.stem}</span><span class="${getElementClass(dy.branch)}">${dy.branch}</span>
+                    </div>
+                    <div class="dy-age">${dy.startAge}岁</div>
+                    <div class="dy-year">${dy.startYear}年</div>
+                </div>
+                <div class="dy-liunians">`;
+            
+            for (const ln of dy.liunians || []) {
+                const lnStem = ln.name.charAt(0);
+                const lnBranch = ln.name.charAt(1);
+                html += `<div class="dy-liunian-item">
+                    <span class="ln-year">${ln.year}</span>
+                    <span class="ln-name"><span class="${getElementClass(lnStem)}">${lnStem}</span><span class="${getElementClass(lnBranch)}">${lnBranch}</span></span>
+                    <span class="ln-age">${ln.age}岁</span>
+                </div>`;
+            }
+            
+            html += `</div></div>`;
         }
-
-        if (bazi.childLimitText) {
-            const card = document.createElement('div');
-            card.className = 'bazi-extra-item';
-            card.style.gridColumn = '1 / -1';
-
-            const k = document.createElement('div');
-            k.className = 'bazi-extra-key';
-            k.textContent = '起运';
-
-            const v = document.createElement('div');
-            v.className = 'bazi-extra-value';
-            v.textContent = bazi.childLimitText;
-            v.style.fontSize = '0.95rem';
-            v.style.fontWeight = '700';
-
-            card.appendChild(k);
-            card.appendChild(v);
-            root.appendChild(card);
-        }
+        html += '</div>';
+        container.innerHTML = html;
     }
 
     initBaziPage() {
@@ -434,67 +418,35 @@ class TraditionalAstrologyWebsite {
         this.setBaziState({ loading: true, error: '', resultVisible: false });
         try {
             const data = await this.fetchCalculate(dateStr, timeStr, gender);
-            if (this.baziSubtitleEl) {
-                this.baziSubtitleEl.textContent = `${dateStr} ${timeStr} · ${gender === '1' ? '乾造' : '坤造'}`;
+            if (this.baziSummaryTableEl) {
+                this.baziSummaryTableEl.innerHTML = `
+                    <div class="bazi-summary-item">
+                        <span class="bazi-summary-label">公历：</span>
+                        <span class="bazi-summary-value">${data.lunar.solarStr} ${data.lunar.week}</span>
+                    </div>
+                    <div class="bazi-summary-item">
+                        <span class="bazi-summary-label">农历：</span>
+                        <span class="bazi-summary-value">${data.lunar.yearName}年 ${data.lunar.monthName} ${data.lunar.dayName}</span>
+                    </div>
+                    <div class="bazi-summary-item">
+                        <span class="bazi-summary-label">性别：</span>
+                        <span class="bazi-summary-value">${gender === '1' ? '乾造 (男)' : '坤造 (女)'}</span>
+                    </div>
+                    <div class="bazi-summary-item">
+                        <span class="bazi-summary-label">生肖：</span>
+                        <span class="bazi-summary-value">${data.lunar.zodiac}</span>
+                    </div>
+                `;
             }
             this.renderBaziGrid(data.bazi?.pillars || [], this.baziGridEl);
             this.renderBaziExtra(data.bazi || {}, this.baziExtraEl);
+            this.renderBaziDayun(data.bazi?.dayuns || [], this.baziDayunEl);
             this.setBaziState({ loading: false, error: '', resultVisible: true });
         } catch (e) {
             this.setBaziState({ loading: false, error: `排盘失败：${e.message || e}`, resultVisible: false });
         }
     }
 
-    showSimpleModal(title) {
-        const modal = document.createElement('div');
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        `;
-
-        const modalContent = document.createElement('div');
-        modalContent.style.cssText = `
-            background: #F5F5DC;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            min-width: 300px;
-            border: 2px solid rgba(212, 175, 55, 0.35);
-        `;
-
-        modalContent.innerHTML = `
-            <h3 style="color: #8B4513; margin-bottom: 1rem;">${title}</h3>
-            <p style="color: #666; margin-bottom: 1rem;">功能开发中，敬请期待...</p>
-            <button type="button" style="
-                background: #8B4513;
-                color: #F5F5DC;
-                border: none;
-                padding: 0.5rem 1rem;
-                border-radius: 5px;
-                cursor: pointer;
-                font-family: inherit;
-                font-weight: 700;
-            ">关闭</button>
-        `;
-
-        modal.appendChild(modalContent);
-        document.body.appendChild(modal);
-
-        const btn = modalContent.querySelector('button');
-        if (btn) btn.addEventListener('click', () => modal.remove());
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.remove();
-        });
-    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

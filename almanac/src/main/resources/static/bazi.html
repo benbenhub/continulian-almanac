@@ -18,24 +18,14 @@
                     <li><a href="/">首页</a></li>
                     <li><a href="/bazi.html" class="active">八字排盘</a></li>
                     <li><a href="#" >命理知识</a></li>
-                    <li><a href="#" >关于我们</a></li>
                 </ul>
             </nav>
-            <div class="user-entry">
-                <button class="login-btn">登录</button>
-                <button class="register-btn">注册</button>
-            </div>
         </div>
     </header>
 
     <main class="main-content bazi-page" id="bazi-page">
         <div class="bazi-container">
             <section class="calc-card">
-                <div class="calc-card-title-row">
-                    <h2 class="calc-card-title">八字排盘</h2>
-                    <div class="calc-subtitle" id="bazi-subtitle"></div>
-                </div>
-
                 <form class="calc-form bazi-form" id="bazi-form">
                     <label class="calc-field">
                         <span class="calc-label">公历日期</span>
@@ -59,8 +49,10 @@
                 <div class="calc-error" id="bazi-error" hidden></div>
 
                 <div class="calc-result" id="bazi-result" hidden>
+                    <div class="bazi-summary-table" id="bazi-summary-table"></div>
                     <div class="bazi-grid" id="bazi-grid"></div>
                     <div class="bazi-extra" id="bazi-extra"></div>
+                    <div class="bazi-dayun" id="bazi-dayun"></div>
                 </div>
             </section>
         </div>

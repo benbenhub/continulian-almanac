@@ -6,7 +6,10 @@ import com.sun.net.httpserver.HttpServer;
 import com.tyme.culture.God;
 import com.tyme.culture.Taboo;
 import com.tyme.eightchar.ChildLimit;
+import com.tyme.eightchar.ChildLimitInfo;
+import com.tyme.eightchar.DecadeFortune;
 import com.tyme.eightchar.EightChar;
+import com.tyme.eightchar.Fortune;
 import com.tyme.enums.Gender;
 import com.tyme.lunar.LunarDay;
 import com.tyme.lunar.LunarHour;
@@ -16,6 +19,7 @@ import com.tyme.sixtycycle.EarthBranch;
 import com.tyme.sixtycycle.HeavenStem;
 import com.tyme.sixtycycle.HideHeavenStem;
 import com.tyme.sixtycycle.SixtyCycle;
+import com.tyme.sixtycycle.SixtyCycleYear;
 import com.tyme.solar.SolarTime;
 
 import java.io.ByteArrayOutputStream;
@@ -183,6 +187,34 @@ public class AlmanacServer {
                 try {
                     ChildLimit cl = ChildLimit.fromSolarTime(solarTime, "1".equals(genderStr) ? Gender.MAN : Gender.WOMAN);
                     bazi.put("childLimitText", "出生后 " + cl.getYearCount() + " 年 " + cl.getMonthCount() + " 个月 " + cl.getDayCount() + " 天起运，即公历 " + cl.getEndTime().getYear() + "年" + cl.getEndTime().getMonth() + "月" + cl.getEndTime().getDay() + "日交运。");
+                    
+                    JsonArray dayuns = new JsonArray();
+                    DecadeFortune startDf = cl.getStartDecadeFortune();
+                    for (int i = 0; i < 9; i++) {
+                        DecadeFortune df = startDf.next(i);
+                        JsonObject dfObj = new JsonObject();
+                        dfObj.put("name", df.getName());
+                        dfObj.put("stem", df.getSixtyCycle().getHeavenStem().getName());
+                        dfObj.put("branch", df.getSixtyCycle().getEarthBranch().getName());
+                        dfObj.put("mainStar", me.getTenStar(df.getSixtyCycle().getHeavenStem()).getName());
+                        dfObj.put("startAge", String.valueOf(df.getStartAge()));
+                        dfObj.put("endAge", String.valueOf(df.getEndAge()));
+                        dfObj.put("startYear", String.valueOf(df.getStartSixtyCycleYear().getYear()));
+                        
+                        JsonArray liunians = new JsonArray();
+                        SixtyCycleYear startLnYear = df.getStartSixtyCycleYear();
+                        for (int j = 0; j < 10; j++) {
+                            SixtyCycleYear lnYear = startLnYear.next(j);
+                            JsonObject fObj = new JsonObject();
+                            fObj.put("name", lnYear.getSixtyCycle().getName());
+                            fObj.put("age", String.valueOf(df.getStartAge() + j));
+                            fObj.put("year", String.valueOf(lnYear.getYear()));
+                            liunians.add(fObj);
+                        }
+                        dfObj.put("liunians", liunians);
+                        dayuns.add(dfObj);
+                    }
+                    bazi.put("dayuns", dayuns);
                 } catch (Exception e) {
                     bazi.put("childLimitText", "起运计算失败");
                 }
